@@ -49,3 +49,33 @@ data_df2 <- tibble(phi = seq(-5, 5, length.out = 100),
                    theta = ilogit(phi))
 ggplot(data_df2, 
        aes(x = phi, y = theta)) + geom_line()
+
+# Logistic regression -----------------------------------------------------
+
+affairs_df <- read_csv("https://raw.githubusercontent.com/mark-andrews/iglm02/master/data/affairs.csv")
+
+affairs_df <- mutate(affairs_df, cheater = affairs > 0)
+
+M_5 <- glm(cheater ~ yearsmarried,
+           family = binomial(link = 'logit'),
+           data = affairs_df)
+
+# M_5 <- lm(yearsmarried ~ cheater, data = affairs_df)
+
+# What are the predicted probabilities of having an affair
+# for different values of yearsmarried ...
+data_df3 <- tibble(yearsmarried = seq(0.5, 50, length.out = 100))
+
+predict(M_5, newdata = data_df3)
+
+library(modelr)
+data_df3 %>% 
+  add_predictions(M_5) %>% 
+  mutate(p = ilogit(pred))
+
+
+predict(M_5, newdata = data_df3, type = 'response')
+
+data_df3 %>% 
+  add_predictions(M_5, type = 'response') %>% 
+  ggplot(aes(x = yearsmarried, y = pred)) + geom_line()
