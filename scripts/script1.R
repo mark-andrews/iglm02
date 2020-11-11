@@ -108,3 +108,12 @@ M_7 <- glm(cheater ~ yearsmarried + age + gender + children + rating,
            data = affairs_df)
 
 anova(M_6, M_7, test = 'Chisq')
+# Akaike
+
+
+# Ordinal logistic regression ---------------------------------------------
+
+library(pscl)
+library(MASS)
+
+M_8 <- polr(score ~ gre.quant, data = admit)
