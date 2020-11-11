@@ -73,9 +73,38 @@ data_df3 %>%
   add_predictions(M_5) %>% 
   mutate(p = ilogit(pred))
 
-
+summary(M_5)
 predict(M_5, newdata = data_df3, type = 'response')
 
 data_df3 %>% 
   add_predictions(M_5, type = 'response') %>% 
   ggplot(aes(x = yearsmarried, y = pred)) + geom_line()
+
+
+
+# Inference ---------------------------------------------------------------
+
+summary(M_5)
+confint.default(M_5)
+confint(M_5)
+
+# deviance ----------------------------------------------------------------
+
+logLik(M_5) * -2
+deviance(M_5)
+
+M_6 <- glm(cheater ~ yearsmarried + age,
+           family = binomial(link = 'logit'),
+           data = affairs_df)
+
+
+delta_deviance <- deviance(M_5) - deviance(M_6)
+pchisq(delta_deviance, df = 1, lower.tail = F)
+anova(M_5, M_6, test = 'Chisq')
+
+
+M_7 <- glm(cheater ~ yearsmarried + age + gender + children + rating,
+           family = binomial(link = 'logit'),
+           data = affairs_df)
+
+anova(M_6, M_7, test = 'Chisq')
