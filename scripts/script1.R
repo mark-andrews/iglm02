@@ -117,3 +117,16 @@ library(pscl)
 library(MASS)
 
 M_8 <- polr(score ~ gre.quant, data = admit)
+mu <- coef(M) * 600
+
+# What's the probability of being below first cutpoint
+# in a logistic distribution with mean mu
+# We use the cumulative distribution function of the logistic distribution.
+plogis(M$zeta[1], location = mu)
+
+# What's the probability of being below second cutpoint
+plogis(M$zeta[2], location = mu)
+
+# What the probability of being *between* first and second cutpoints
+plogis(M$zeta[2], location = mu) - plogis(M$zeta[1], location = mu)
+
