@@ -95,3 +95,60 @@ M_17 <- glm.nb(publications ~ gender + married + prestige,
                data = biochem_df)
 
 summary(M_17)
+
+# binomial logistic regression --------------------------------------------
+
+golf_df <- read_csv("https://raw.githubusercontent.com/mark-andrews/iglm02/master/data/golf_putts.csv")
+
+
+mutate(golf_df,
+       p = success/attempts) %>% 
+  ggplot(aes(x = distance, y = p)) + geom_point()
+
+golf_df <- mutate(golf_df,
+                  failure = attempts - success)
+
+
+M_18 <- glm(cbind(success, failure) ~ distance,
+            family = binomial(link = 'logit'),
+            data = golf_df)
+
+summary(M_18)
+
+tibble(distance = seq(2, 20)) %>% 
+  add_predictions(M_18, type = 'response') %>% 
+  ggplot(aes(x = distance, y = pred)) + geom_line() + geom_point()
+
+golf_df %>% 
+  mutate(p = success/attempts) %>% 
+  add_predictions(M_18, type = 'response') %>% 
+  ggplot(aes(x = distance)) +
+  geom_point(aes(y = p)) +
+  geom_line(aes(y = pred), colour = 'red')
+
+
+# zero inflated models ----------------------------------------------------
+
+smoking_df <- read_csv("https://raw.githubusercontent.com/mark-andrews/iglm02/master/data/smoking.csv")
+
+ggplot(smoking_df,
+       aes(x = cigs)) + geom_bar()
+
+M_19 <- glm(cigs ~ educ, 
+            data = smoking_df,
+            family = poisson(link = 'log'))
+summary(M_19)$coefficients
+
+library(pscl)
+M_20 <- zeroinfl(cigs ~ educ, data = smoking_df)
+
+smoking_df2 <- tibble(educ = seq(6, 18))
+
+smoking_df2 %>% 
+  add_predictions(M_20, type = 'zero')
+
+smoking_df2 %>% 
+  add_predictions(M_20, type = 'count')
+
+smoking_df2 %>% 
+  add_predictions(M_20, type = 'response')
