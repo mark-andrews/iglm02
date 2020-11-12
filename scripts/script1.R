@@ -117,11 +117,19 @@ library(pscl)
 library(MASS)
 
 M_8 <- polr(score ~ gre.quant, data = admit)
-mu <- coef(M) * 600
+
+admit_df2 <- tibble(gre.quant = seq(300, 800, by = 100))
+
+admit_df2 %>% 
+  add_predictions(M_8, type = 'prob')
+
 
 # What's the probability of being below first cutpoint
 # in a logistic distribution with mean mu
 # We use the cumulative distribution function of the logistic distribution.
+mu <- coef(M) * 600
+
+
 plogis(M$zeta[1], location = mu)
 
 # What's the probability of being below second cutpoint
@@ -130,3 +138,24 @@ plogis(M$zeta[2], location = mu)
 # What the probability of being *between* first and second cutpoints
 plogis(M$zeta[2], location = mu) - plogis(M$zeta[1], location = mu)
 
+
+# categorical -------------------------------------------------------------
+
+library(nnet)
+M_9 <- multinom(score ~ gre.quant, data = admit)
+
+summary(M_9)
+
+admit_df2 %>% 
+  add_predictions(M_9, type = 'prob')
+
+z <- coef(M_9) %*% c(1, 600)
+z <- c(0, z)
+exp(z)/sum(exp(z))
+
+z <- coef(M_9) %*% c(1, 400)
+z <- c(0, z)
+exp(z)/sum(exp(z))
+
+
+prob <- admit_df2 %>% add_predictions(M_9, type = 'prob')
